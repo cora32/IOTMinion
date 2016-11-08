@@ -7,6 +7,7 @@
 #include "IpListParser.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/asio.hpp>
+#include <boost/filesystem.hpp>
 
 const vector<pair<uint64_t, uint64_t> > IpListParser::loadVector(const char *filename) {
     cout << "Loading " << filename << endl;
@@ -64,12 +65,6 @@ vector<pair<uint64_t, uint64_t> *> IpListParser::trimVector(vector<pair<uint64_t
             }
             haters_gonna_hate:;
         }
-
-        for (pair<uint64_t, uint64_t> *pair1 : result) {
-            cout << pair1->first << " " << pair1->second << endl;
-            cout << boost::asio::ip::address_v4(pair1->first).to_string() << " "
-                 << boost::asio::ip::address_v4(pair1->second).to_string() << endl;
-        }
     }
     return result;
 }
@@ -90,39 +85,53 @@ const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<strin
 //        uint64_t longAddress1 = boost::asio::ip::address_v6::from_string(result[0]).to_bytes();
 //        uint64_t longAddress2 = boost::asio::ip::address_v6::from_string(result[1]).to_bytes();
 
-        pair<uint64_t, uint64_t> ipPair(longAddress1, longAddress2);
-        ipPairVector.push_back(ipPair);
+        if (longAddress1 > longAddress2) {
+//            std::cout << colorSet( h, DARKTEAL )<<" I am coloured!!" << colorSet( h, GRAY ) << std::endl;
+            cout << " [-]Skipping range. Check line " << i + 1 << endl;
+        } else {
+            pair<uint64_t, uint64_t> ipPair(longAddress1, longAddress2);
+            ipPairVector.push_back(ipPair);
+        }
     }
 
     return ipPairVector;
 }
 
-void IpListParser::fillInnerVector(vector<pair<uint64_t, uint64_t> *> vector, int startIndex, int initialOffset) {
+void
+IpListParser::fillVectorAndRandomize(vector<pair<uint64_t, uint64_t> *> _vector, int startIndex, int initialOffset) {
+    fillInnerVector(_vector, startIndex, initialOffset);
+    std::shuffle(std::begin(ipList), std::end(ipList), engine);
+}
+
+void IpListParser::fillInnerVector(vector<pair<uint64_t, uint64_t> *> _vector, int startIndex, int initialOffset) {
     atomicIndex = 0;
     ipList.clear();
-    int sz = vector.size();
-    if (vector.size() > 0 && startIndex < vector.size()) {
-        const pair<uint64_t, uint64_t> *pair = vector[startIndex];
-        int initOffset = 0;
+    int sz = _vector.size();
+    if (_vector.size() > 0 && startIndex < _vector.size()) {
+        const pair<uint64_t, uint64_t> *pair = _vector[startIndex];
+        int initOffset = initialOffset;
         for (uint64_t j = pair->first + initialOffset; j <= pair->second; ++j, ++initOffset) {
             if (ipList.size() == INITIAL_CAPACITY) {
-                saveRestToFile(vector, startIndex, j, pair->second, initOffset);
+                saveRestToFile(_vector, startIndex, j, pair->second, initOffset);
                 return;
             }
-            cout << "pushed: " << boost::asio::ip::address_v4(j).to_string() << endl;
             ipList.push_back(j);
         }
+        initOffset = 0;
         for (int i = startIndex + 1; i < sz; ++i) {
-            pair = vector[i];
-            for (uint64_t j = pair->first, initOffset = 0; j <= pair->second; ++j, ++initOffset) {
+            pair = _vector[i];
+            for (uint64_t j = pair->first; j <= pair->second; ++j, ++initOffset) {
                 if (ipList.size() == INITIAL_CAPACITY) {
-                    saveRestToFile(vector, i, j, pair->second, initOffset);
+                    saveRestToFile(_vector, i, j, pair->second, initOffset);
                     return;
                 }
-                cout << "pushed: " << boost::asio::ip::address_v4(j).to_string() << endl;
                 ipList.push_back(j);
             }
+            initOffset = 0;
         }
+        lastVectorIndex = sz;
+        lastVectorOffset = initOffset;
+        boost::filesystem::remove(boost::filesystem::absolute(std::string(TEMP_FILENAME)));
     }
 }
 
@@ -130,9 +139,18 @@ bool IpListParser::hasNext() {
     if (atomicIndex != ipList.size()) {
         return true;
     }
-    if (lastVectorIndex < _vector.size()) {
-        fillInnerVector(_vector, lastVectorIndex, lastVectorOffset);
+    int sz = _vector.size() - 1;
+    if (lastVectorIndex < sz) {
+        fillVectorAndRandomize(_vector, lastVectorIndex, lastVectorOffset);
         return true;
+    }
+    if (lastVectorIndex == sz) {
+        pair<uint64_t, uint64_t> *pair = _vector[lastVectorIndex];
+        int range = pair->second - pair->first;
+        if (lastVectorOffset <= range) {
+            fillVectorAndRandomize(_vector, lastVectorIndex, lastVectorOffset);
+            return true;
+        } else return false;
     }
 
     return false;
@@ -142,7 +160,7 @@ const uint64_t IpListParser::getNext() {
     return ipList[atomicIndex++];
 }
 
-void IpListParser::saveRestToFile(const vector<pair<uint64_t, uint64_t> *> vector, int vectorIndex, uint64_t ipFirst,
+void IpListParser::saveRestToFile(const vector<pair<uint64_t, uint64_t> *> _vector, int vectorIndex, uint64_t ipFirst,
                                   uint64_t ipSecond, int initOffset) {
     std::ofstream output(TEMP_FILENAME);
 
@@ -150,22 +168,20 @@ void IpListParser::saveRestToFile(const vector<pair<uint64_t, uint64_t> *> vecto
     lastVectorOffset = initOffset;
 
     if (!output.fail()) {
-        cout << "saved: " << boost::asio::ip::address_v4(ipFirst).to_string() << "-"
-             << boost::asio::ip::address_v4(ipSecond).to_string() << endl;
         output << boost::asio::ip::address_v4(ipFirst).to_string() << "-"
                << boost::asio::ip::address_v4(ipSecond).to_string() << endl;
     }
 
-    int sz = vector.size();
+    int sz = _vector.size();
     for (int i = vectorIndex + 1; i < sz; ++i) {
-        const pair<uint64_t, uint64_t> *pair = vector[i];
+        const pair<uint64_t, uint64_t> *pair = _vector[i];
         if (!output.fail()) {
-            cout << "saved: " << boost::asio::ip::address_v4(pair->first).to_string() << "-"
-                 << boost::asio::ip::address_v4(pair->second).to_string() << endl;
             output << boost::asio::ip::address_v4(pair->first).to_string() << "-"
                    << boost::asio::ip::address_v4(pair->second).to_string() << endl;
         }
     }
 }
+
+
 
 

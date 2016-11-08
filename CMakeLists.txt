@@ -18,7 +18,7 @@ unset(Boost_INCLUDE_DIR CACHE)
 unset(Boost_LIBRARY_DIRS CACHE)
 unset(Boost_LIBRARIES CACHE)
 
-find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 if (Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     add_executable(IOTMinion ${SOURCE_FILES})
