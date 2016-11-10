@@ -86,7 +86,7 @@ const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<strin
 //        uint64_t longAddress2 = boost::asio::ip::address_v6::from_string(result[1]).to_bytes();
 
         if (longAddress1 > longAddress2) {
-//            std::cout << colorSet( h, DARKTEAL )<<" I am coloured!!" << colorSet( h, GRAY ) << std::endl;
+//            std::cout << colorSet( h, DARKTEAL )<<" I am coloured!!" << colorSet( h, GRAY ) <<  std::endl;
             cout << " [-]Skipping range. Check line " << i + 1 << endl;
         } else {
             pair<uint64_t, uint64_t> ipPair(longAddress1, longAddress2);
