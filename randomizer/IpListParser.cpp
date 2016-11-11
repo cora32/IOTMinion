@@ -8,6 +8,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
+#include <c++/regex>
 
 const vector<pair<uint64_t, uint64_t> > IpListParser::loadVector(const char *filename) {
     cout << "Loading " << filename << endl;
@@ -72,24 +73,59 @@ vector<pair<uint64_t, uint64_t> *> IpListParser::trimVector(vector<pair<uint64_t
 const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<string> ipVector) {
     vector<pair<uint64_t, uint64_t> > ipPairVector;
 
+    std::regex patternIPv4("(\\d{1,3}(\\.\\d{1,3}){3})");
     int sz = ipVector.size();
     for (int i = 0; i < sz; i++) {
         string ipStr = ipVector[i];
-        vector<string> result;
-        boost::split(result, ipStr, boost::is_any_of("-"));
+        if (ipStr.find("-") != string::npos) {
+            vector<string> result;
+            boost::split(result, ipStr, boost::is_any_of("-"));
 
-        //IPv4
-        uint64_t longAddress1 = boost::asio::ip::address_v4::from_string(result[0]).to_ulong();
-        uint64_t longAddress2 = boost::asio::ip::address_v4::from_string(result[1]).to_ulong();
-        //IPv6
-//        uint64_t longAddress1 = boost::asio::ip::address_v6::from_string(result[0]).to_bytes();
-//        uint64_t longAddress2 = boost::asio::ip::address_v6::from_string(result[1]).to_bytes();
+            std::smatch match;
+            if (!std::regex_search(result[0], match, patternIPv4) ||
+                !std::regex_search(result[1], match, patternIPv4)) {
+                cout << " [-]Skipping " + ipStr + " Line " << i + 1 << endl;
+                continue;
+            }
 
-        if (longAddress1 > longAddress2) {
+            //IPv4
+            uint64_t longAddress1 = boost::asio::ip::address_v4::from_string(result[0]).to_ulong();
+            uint64_t longAddress2 = boost::asio::ip::address_v4::from_string(result[1]).to_ulong();
+
+            if (longAddress1 > longAddress2) {
 //            std::cout << colorSet( h, DARKTEAL )<<" I am coloured!!" << colorSet( h, GRAY ) <<  std::endl;
-            cout << " [-]Skipping range. Check line " << i + 1 << endl;
-        } else {
+                cout << " [-]Skipping " + ipStr + " Line " << i + 1 << endl;
+            } else {
+                pair<uint64_t, uint64_t> ipPair(longAddress1, longAddress2);
+                ipPairVector.push_back(ipPair);
+            }
+        } else if (ipStr.find("/") != string::npos) {
+            vector<string> result;
+            boost::split(result, ipStr, boost::is_any_of("/"));
+
+            std::smatch match;
+            if (!std::regex_search(result[0], match, patternIPv4)) {
+                cout << " [-]Skipping " + ipStr + " Line " << i + 1 << endl;
+                continue;
+            }
+            int cidrRange = stoi(result[1]);
+            if (cidrRange < 1 || cidrRange > 32) {
+                cout << " [-]Skipping " + ipStr + " Line " << i + 1 << endl;
+                continue;
+            }
+
+            uint32_t maxIPv4 = ULONG_MAX;
+            uint32_t netmask = maxIPv4 << (32 - cidrRange);
+            uint32_t wildcard = maxIPv4 >> cidrRange;
+
+            uint32_t longAddress1 = boost::asio::ip::address_v4::from_string(result[0]).to_ulong() & netmask;
+            uint32_t longAddress2 = longAddress1 | wildcard;
+
             pair<uint64_t, uint64_t> ipPair(longAddress1, longAddress2);
+            ipPairVector.push_back(ipPair);
+        } else {
+            uint64_t longAddress = boost::asio::ip::address_v4::from_string(ipStr).to_ulong();
+            pair<uint64_t, uint64_t> ipPair(longAddress, longAddress);
             ipPairVector.push_back(ipPair);
         }
     }
