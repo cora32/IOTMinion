@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(IOTMinion)
 
-set(SOURCE_FILES main.cpp randomizer/IpListParser.cpp randomizer/IpListParser.h)
+set(SOURCE_FILES main.cpp randomizer/IpListParser.cpp randomizer/IpListParser.h netcon/NetCon.cpp netcon/NetCon.h)
 
 #if(CMAKE_COMPILER_IS_GNUCXX)
 #    set(CMAKE_CXX_FLAGS "-O3")        ## Optimize

@@ -114,12 +114,12 @@ const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<strin
                 continue;
             }
 
-            uint32_t maxIPv4 = ULONG_MAX;
-            uint32_t netmask = maxIPv4 << (32 - cidrRange);
-            uint32_t wildcard = maxIPv4 >> cidrRange;
+            uint64_t maxIPv4 = ULONG_MAX;
+            uint64_t netmask = maxIPv4 << (32 - cidrRange);
+            uint64_t wildcard = maxIPv4 >> cidrRange;
 
-            uint32_t longAddress1 = boost::asio::ip::address_v4::from_string(result[0]).to_ulong() & netmask;
-            uint32_t longAddress2 = longAddress1 | wildcard;
+            uint64_t longAddress1 = boost::asio::ip::address_v4::from_string(result[0]).to_ulong() & netmask;
+            uint64_t longAddress2 = longAddress1 | wildcard;
 
             pair<uint64_t, uint64_t> ipPair(longAddress1, longAddress2);
             ipPairVector.push_back(ipPair);
