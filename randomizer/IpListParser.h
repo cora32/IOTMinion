@@ -5,6 +5,7 @@
 #ifndef RANDOMIZER_IPLISTPARSER_H
 #define RANDOMIZER_IPLISTPARSER_H
 
+#include "../Logger/Logger.h"
 #include <iostream>
 #include <list>
 #include <c++/vector>
@@ -23,20 +24,28 @@ private:
     static constexpr const char *TEMP_FILENAME = ".iptemp";
     static constexpr const unsigned int INITIAL_CAPACITY = 50000;
     default_random_engine engine;
-    int lastVectorIndex;
+    size_t lastVectorIndex;
     int lastVectorOffset;
     atomic_int atomicIndex;
     vector<uint64_t> ipList;
     vector<pair<uint64_t, uint64_t> *> _vector;
+    bool disableShuffle = true;
 public:
-    IpListParser(char *path) : atomicIndex(0), lastVectorIndex(0), lastVectorOffset(0),
-                               engine(std::default_random_engine{
-                                       std::chrono::system_clock::now().time_since_epoch().count()}) {
+    IpListParser(const char *path, const bool shuffleDisabled) : atomicIndex(0), lastVectorIndex(0),
+                                                                 lastVectorOffset(0),
+                                                                 engine(std::default_random_engine {
+                                                                         (unsigned int) std::chrono::system_clock::now().time_since_epoch().count()})
+    {
+        disableShuffle = shuffleDisabled;
+
         ipList.reserve(INITIAL_CAPACITY);
 
         const vector<pair<uint64_t, uint64_t> > &ipPairVector = loadVector(path);
-        _vector = trimVector((vector<pair<uint64_t, uint64_t> > &) ipPairVector);
-        fillVectorAndRandomize(_vector);
+        if (ipPairVector.size() > 0) {
+            _vector = trimVector((vector<pair<uint64_t, uint64_t> > &) ipPairVector);
+            fillVectorAndRandomize(_vector);
+        } else
+            std::cout << "Empty list." << std::endl;
     };
 
     const vector<pair<uint64_t, uint64_t> > loadVector(const char *filename);
@@ -47,13 +56,16 @@ public:
 
     const uint64_t getNext();
 
-    void fillInnerVector(vector<pair<uint64_t, uint64_t> *> _vector, int startIndex = 0, int initialOffset = 0);
+    void fillInnerVector(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex = 0, int initialOffset = 0);
 
-    void fillVectorAndRandomize(vector<pair<uint64_t, uint64_t> *> _vector, int startIndex = 0, int initialOffset = 0);
+    void
+    fillVectorAndRandomize(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex = 0, int initialOffset = 0);
 
     bool hasNext();
 
-    void saveRestToFile(const vector<pair<uint64_t, uint64_t> *> _vector, int vectorIndex, uint64_t ipFirst,
+    bool isEmpty();
+
+    void saveRestToFile(const vector<pair<uint64_t, uint64_t> *> _vector, size_t vectorIndex, uint64_t ipFirst,
                         uint64_t ipSecond, int initOffset);
 };
 
