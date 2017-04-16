@@ -15,7 +15,7 @@
  * @param filename
  * @return
  */
-const vector<pair<uint64_t, uint64_t> > IpListParser::loadVector(const char *filename)
+const vector<pair<uint64_t, uint64_t> > IpListParser::loadVector(const char *filename) noexcept
 {
     Logger::print({"Loading ", filename});
     ifstream inputFile(filename);
@@ -43,29 +43,29 @@ const vector<pair<uint64_t, uint64_t> > IpListParser::loadVector(const char *fil
  * @param ipVector
  * @return
  */
-vector<pair<uint64_t, uint64_t> *> IpListParser::trimVector(vector<pair<uint64_t, uint64_t> > &ipVector)
+vector<pair<uint64_t, uint64_t> *> IpListParser::trimVector(vector<pair<uint64_t, uint64_t> > &ipVector) noexcept
 {
     vector<pair<uint64_t, uint64_t> *> result;
     if (ipVector.size() > 0) {
         sort(ipVector.begin(), ipVector.end());
 
-        pair<uint64_t, uint64_t> pair1 = ipVector[0];
-        pair<uint64_t, uint64_t> *newPair = new pair<uint64_t, uint64_t>(pair1);
+        auto pair1 = ipVector[0];
+        auto *newPair = new pair<uint64_t, uint64_t>(pair1);
         result.push_back(newPair);
         size_t sz = ipVector.size();
         for (int i = 0; i < sz; i++) {
             pair1 = ipVector[i];
-            size_t sz2 = result.size();
-            for (size_t j = 0; j < sz2; j++) {
-                pair<uint64_t, uint64_t> *pair2 = result[j];
+            auto sz2 = result.size();
+            for (auto j = 0; j < sz2; j++) {
+                auto *pair2 = result[j];
                 if (pair1.first == pair2->first) {
                     if (pair1.second >= pair2->second)
                         pair2->second = pair1.second;
                     break;
                 } else {
-                    size_t sz3 = result.size();
-                    for (size_t k = j; k < sz3; k++) {
-                        pair<uint64_t, uint64_t> *pair3 = result[k];
+                    auto sz3 = result.size();
+                    for (auto k = j; k < sz3; k++) {
+                        auto *pair3 = result[k];
                         if (pair1.first <= pair3->second) {
                             if (pair1.second > pair3->second)
                                 pair3->second = pair1.second;
@@ -75,8 +75,7 @@ vector<pair<uint64_t, uint64_t> *> IpListParser::trimVector(vector<pair<uint64_t
                             goto haters_gonna_hate;
                         }
                     }
-                    pair<uint64_t, uint64_t> *newPair = new pair<uint64_t, uint64_t>(pair1);
-                    result.push_back(newPair);
+                    result.push_back(new pair<uint64_t, uint64_t>(pair1));
                 }
             }
             haters_gonna_hate:;
@@ -90,14 +89,14 @@ vector<pair<uint64_t, uint64_t> *> IpListParser::trimVector(vector<pair<uint64_t
  * @param ipVector
  * @return
  */
-const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<string> ipVector)
+const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<string> ipVector) noexcept
 {
     vector<pair<uint64_t, uint64_t> > ipPairVector;
 
     std::regex patternIPv4("(\\d{1,3}(\\.\\d{1,3}){3})");
     size_t sz = ipVector.size();
     for (int i = 0; i < sz; i++) {
-        string ipStr = ipVector[i];
+        auto ipStr = ipVector[i];
         /**
          * It is an ordinary range string ip-ip
          */
@@ -171,7 +170,8 @@ const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<strin
  * @param initialOffset
  */
 void
-IpListParser::fillVectorAndRandomize(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex, int initialOffset)
+IpListParser::fillVectorAndRandomize(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex,
+                                     int initialOffset) noexcept
 {
     fillInnerVector(_vector, startIndex, initialOffset);
     if (!disableShuffle)
@@ -185,7 +185,8 @@ IpListParser::fillVectorAndRandomize(vector<pair<uint64_t, uint64_t> *> _vector,
  * @param startIndex
  * @param initialOffset
  */
-void IpListParser::fillInnerVector(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex, int initialOffset)
+void
+IpListParser::fillInnerVector(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex, int initialOffset) noexcept
 {
     atomicIndex = 0;
     ipList.clear();
@@ -218,7 +219,7 @@ void IpListParser::fillInnerVector(vector<pair<uint64_t, uint64_t> *> _vector, s
     }
 }
 
-bool IpListParser::isEmpty()
+bool IpListParser::isEmpty() noexcept
 {
     return ipList.empty();
 }
@@ -228,7 +229,7 @@ bool IpListParser::isEmpty()
  * If ipList is depleted it is refilled with @INITIAL_CAPACITY items from @TEMP_FILENAME
  * @return
  */
-bool IpListParser::hasNext()
+bool IpListParser::hasNext() noexcept
 {
     if (atomicIndex != ipList.size()) {
         return true;
@@ -250,7 +251,7 @@ bool IpListParser::hasNext()
     return false;
 }
 
-const uint64_t IpListParser::getNext()
+const uint64_t IpListParser::getNext() noexcept
 {
     return ipList[atomicIndex++];
 }
@@ -265,7 +266,7 @@ const uint64_t IpListParser::getNext()
  */
 void
 IpListParser::saveRestToFile(const vector<pair<uint64_t, uint64_t> *> _vector, size_t vectorIndex, uint64_t ipFirst,
-                             uint64_t ipSecond, int initOffset)
+                             uint64_t ipSecond, int initOffset) noexcept
 {
     std::ofstream output(TEMP_FILENAME);
 

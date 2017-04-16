@@ -56,7 +56,7 @@ struct Params
  * @param port
  * @return
  */
-vector<unsigned short> parsePorts(const string &port)
+const vector<unsigned short> parsePorts(const string &port)
 {
     vector<unsigned short> result;
     vector<string> portVector;
@@ -71,7 +71,7 @@ vector<unsigned short> parsePorts(const string &port)
             unsigned short startPort = (unsigned short) stoi(tempVector[0]);
             unsigned short endPort = (unsigned short) stoi(tempVector[1]);
 
-            for (unsigned short j = startPort; j <= endPort; j++) {
+            for (auto j = startPort; j <= endPort; j++) {
                 result.push_back(j);
             }
         } else {
@@ -196,7 +196,7 @@ int main(int argc, char **argv)
     Params params;
     if (parseParams(argc, argv, params)) {
         boost::thread_group threadGroup;
-        const vector<unsigned short> &portVector = parsePorts(params.port);
+        const auto &portVector = parsePorts(params.port);
         /**
          * If no file specified use singe-ip mode
          */

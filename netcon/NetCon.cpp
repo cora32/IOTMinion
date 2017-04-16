@@ -78,7 +78,7 @@
 //}
 
 void
-NetCon::connect(uint64_t longIp, int port, void (*pFunction)(char *))
+NetCon::connect(uint64_t longIp, int port, void (*pFunction)(char *)) noexcept
 {
     service_.reset();
     socket_ = tcp::socket(service_);
@@ -101,27 +101,27 @@ NetCon::connect(uint64_t longIp, int port, void (*pFunction)(char *))
     service_.run();
 }
 
-void NetCon::close()
+void NetCon::close() noexcept
 {
     timer_.expires_from_now(boost::posix_time::pos_infin); // Stop the timer
     socket_.close();
 };
 
-void NetCon::ConnectTimeout(const boost::system::error_code &error)
+void NetCon::ConnectTimeout(const boost::system::error_code &error) noexcept
 {
     if (!error) {
         close();
     }
 }
 
-void NetCon::ReadTimeout(const boost::system::error_code &error)
+void NetCon::ReadTimeout(const boost::system::error_code &error) noexcept
 {
     if (!error) {
         close();
     }
 }
 
-void NetCon::handle_connect(const boost::system::error_code &error)
+void NetCon::handle_connect(const boost::system::error_code &error) noexcept
 {
     if (!error) {
         resetTimer();
@@ -134,7 +134,7 @@ void NetCon::handle_connect(const boost::system::error_code &error)
     }
 }
 
-void NetCon::connectCallback(const boost::system::error_code &err, tcp::resolver::iterator endpoint_iterator)
+void NetCon::connectCallback(const boost::system::error_code &err, tcp::resolver::iterator endpoint_iterator) noexcept
 {
 //    if (!err) {
 //        boost::asio::async_write(socket_, requestBuff,
@@ -149,7 +149,7 @@ void NetCon::connectCallback(const boost::system::error_code &err, tcp::resolver
 //    }
 }
 
-void NetCon::responseCallback(const boost::system::error_code &err)
+void NetCon::responseCallback(const boost::system::error_code &err) noexcept
 {
     if (!err) {
         boost::asio::async_read(socket_, responseBuff, boost::asio::transfer_at_least(1),
@@ -158,7 +158,7 @@ void NetCon::responseCallback(const boost::system::error_code &err)
     }
 }
 
-void NetCon::readCallback(const boost::system::error_code &err)
+void NetCon::readCallback(const boost::system::error_code &err) noexcept
 {
     if (!err) {
         resetTimer();
@@ -173,13 +173,13 @@ void NetCon::readCallback(const boost::system::error_code &err)
     }
 }
 
-void NetCon::setTimeout(unsigned long timeout)
+void NetCon::setTimeout(unsigned long timeout) noexcept
 {
     timeout_ = timeout;
     timer_.expires_from_now(boost::posix_time::milliseconds(timeout_)); //setting timeout
 }
 
-void NetCon::resetTimer()
+void NetCon::resetTimer() noexcept
 {
     timer_.expires_from_now(boost::posix_time::milliseconds(timeout_)); //reset timer
     timer_.async_wait(boost::bind(&NetCon::ReadTimeout, this, boost::asio::placeholders::error));
