@@ -23,25 +23,26 @@ private:
     static std::condition_variable cond_var;
     static std::condition_variable return_m_cond_var;
 public:
-    static void print(const std::ostream &out);
+    static void print(const std::ostream &out) noexcept;
 
-    static void print(const std::stringstream &ss);
+    static void print(const std::stringstream &ss) noexcept;
 
-    static void print(const char *c_ctr);
+    static void print(const char *c_ctr) noexcept;
 
-    static void print(const std::string &string);
-    static void print(const std::initializer_list<std::string> arg_list);
+    static void print(const std::string &string) noexcept;
 
-    static void print(const boost::program_options::options_description &od);
+    static void print(const std::initializer_list<std::string> arg_list) noexcept;
 
-    static void start();
+    static void print(const boost::program_options::options_description &od) noexcept;
 
-    static void stop();
+    static void start() noexcept;
+
+    static void stop() noexcept;
 
 private:
-    static void _start();
+    static void _start() noexcept;
 
-    static void _print(const std::string &string);
+    static void _print(const std::string &string) noexcept;
 };
 
 

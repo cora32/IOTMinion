@@ -40,26 +40,26 @@ public:
                                                timeout_(DEFAULT_TIMEOUT)
     {}
 
-    void connect(uint64_t address, int port, void (*pFunction)(char *));
+    void connect(uint64_t address, int port, void (*pFunction)(char *)) noexcept;
 
-    void ConnectTimeout(const boost::system::error_code &error);
+    void ConnectTimeout(const boost::system::error_code &error) noexcept;
 
-    void ReadTimeout(const boost::system::error_code &error);
+    void ReadTimeout(const boost::system::error_code &error) noexcept;
 
-    void handle_connect(const boost::system::error_code &error);
+    void handle_connect(const boost::system::error_code &error) noexcept;
 
-    void setTimeout(unsigned long timeout);
+    void setTimeout(unsigned long timeout) noexcept;
 private:
-    void connectCallback(const boost::system::error_code &err, tcp::resolver::iterator endpoint_iterator);
+    void connectCallback(const boost::system::error_code &err, tcp::resolver::iterator endpoint_iterator) noexcept;
 
     void
-    responseCallback(const boost::system::error_code &err);
+    responseCallback(const boost::system::error_code &err) noexcept;
 
-    void readCallback(const boost::system::error_code &err);
+    void readCallback(const boost::system::error_code &err) noexcept;
 
-    void resetTimer();
+    void resetTimer() noexcept;
 
-    void close();
+    void close() noexcept;
 };
 
 #endif //ASYNC_CLIENT_NETCON_H

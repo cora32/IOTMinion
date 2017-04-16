@@ -48,25 +48,27 @@ public:
             Logger::print("Empty list");
     };
 
-    const vector<pair<uint64_t, uint64_t> > loadVector(const char *filename);
+    const vector<pair<uint64_t, uint64_t> > loadVector(const char *filename) noexcept;
 
-    vector<pair<uint64_t, uint64_t> *> trimVector(vector<pair<uint64_t, uint64_t> > &ipVector);
+    vector<pair<uint64_t, uint64_t> *> trimVector(vector<pair<uint64_t, uint64_t> > &ipVector) noexcept;
 
-    const vector<pair<uint64_t, uint64_t> > parseIPVector(vector<string> _vector);
+    const vector<pair<uint64_t, uint64_t> > parseIPVector(vector<string> _vector) noexcept;
 
-    const uint64_t getNext();
-
-    void fillInnerVector(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex = 0, int initialOffset = 0);
+    const uint64_t getNext() noexcept;
 
     void
-    fillVectorAndRandomize(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex = 0, int initialOffset = 0);
+    fillInnerVector(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex = 0, int initialOffset = 0) noexcept;
 
-    bool hasNext();
+    void
+    fillVectorAndRandomize(vector<pair<uint64_t, uint64_t> *> _vector, size_t startIndex = 0,
+                           int initialOffset = 0) noexcept;
 
-    bool isEmpty();
+    bool hasNext() noexcept;
+
+    bool isEmpty() noexcept;
 
     void saveRestToFile(const vector<pair<uint64_t, uint64_t> *> _vector, size_t vectorIndex, uint64_t ipFirst,
-                        uint64_t ipSecond, int initOffset);
+                        uint64_t ipSecond, int initOffset) noexcept;
 };
 
 #endif //RANDOMIZER_IPLISTPARSER_H
