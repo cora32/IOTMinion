@@ -45,7 +45,7 @@ public:
             _vector = trimVector((vector<pair<uint64_t, uint64_t> > &) ipPairVector);
             fillVectorAndRandomize(_vector);
         } else
-            std::cout << "Empty list." << std::endl;
+            Logger::print("Empty list");
     };
 
     const vector<pair<uint64_t, uint64_t> > loadVector(const char *filename);

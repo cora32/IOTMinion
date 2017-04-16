@@ -108,7 +108,7 @@ const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<strin
             std::smatch match;
             if (!std::regex_search(result[0], match, patternIPv4) ||
                 !std::regex_search(result[1], match, patternIPv4)) {
-                cout << " [-]Skipping " + ipStr + " Line " << i + 1 << endl;
+                Logger::print(std::stringstream() << " [-]Skipping " + ipStr + " Line " << i + 1 << endl);
                 continue;
             }
 
@@ -117,7 +117,7 @@ const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<strin
             uint64_t longAddress2 = boost::asio::ip::address_v4::from_string(result[1]).to_ulong();
 
             if (longAddress1 > longAddress2) {
-                cout << " [-]Skipping " + ipStr + " Line " << i + 1 << endl;
+                Logger::print(std::stringstream() << " [-]Skipping " + ipStr + " Line " << i + 1 << endl);
             } else {
                 pair<uint64_t, uint64_t> ipPair(longAddress1, longAddress2);
                 ipPairVector.push_back(ipPair);
@@ -132,12 +132,12 @@ const vector<pair<uint64_t, uint64_t> > IpListParser::parseIPVector(vector<strin
 
             std::smatch match;
             if (!std::regex_search(result[0], match, patternIPv4)) {
-                cout << " [-]Skipping " + ipStr + " Line " << i + 1 << endl;
+                Logger::print(std::stringstream() << " [-]Skipping " + ipStr + " Line " << i + 1 << endl);
                 continue;
             }
             int cidrRange = stoi(result[1]);
             if (cidrRange < 1 || cidrRange > 32) {
-                cout << " [-]Skipping " + ipStr + " Line " << i + 1 << endl;
+                Logger::print(std::stringstream() << " [-]Skipping " + ipStr + " Line " << i + 1 << endl);
                 continue;
             }
 

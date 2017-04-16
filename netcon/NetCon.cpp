@@ -96,6 +96,7 @@ NetCon::connect(uint64_t longIp, int port, void (*pFunction)(char *))
 
 
     Logger::print({"--", ipString.to_string(), ":", to_string(port), " Started"});
+
 //    cout<<"=="<<ipString.to_string()<<endl;
     service_.run();
 }
@@ -161,8 +162,7 @@ void NetCon::readCallback(const boost::system::error_code &err)
 {
     if (!err) {
         resetTimer();
-        const char *str = boost::asio::buffer_cast<const char *>(responseBuff.data());
-        Logger::print({"<--", str});
+        Logger::print({"<--", boost::asio::buffer_cast<const char *>(responseBuff.data())});
 
         boost::asio::async_read(socket_, responseBuff,
                                 boost::asio::transfer_at_least(1),

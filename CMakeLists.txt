@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(IOTMinion)
 
-set(SOURCE_FILES main.cpp randomizer/IpListParser.cpp randomizer/IpListParser.h netcon/NetCon.cpp netcon/NetCon.h constants.h Logger.h Logger/Logger.cpp Logger/Logger.h)
+set(SOURCE_FILES main.cpp randomizer/IpListParser.cpp randomizer/IpListParser.h netcon/NetCon.cpp netcon/NetCon.h constants.h Logger/Logger.cpp Logger/Logger.h)
 
 #if(CMAKE_COMPILER_IS_GNUCXX)
 #    set(CMAKE_CXX_FLAGS "-O3")        ## Optimize
@@ -9,7 +9,7 @@ set(SOURCE_FILES main.cpp randomizer/IpListParser.cpp randomizer/IpListParser.h 
 #endif ()
 
 set(Boost_ADDITIONAL_VERSIONS "1.63.0" "1.63" ${Boost_ADDITIONAL_VERSIONS})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 #add_compile_options(-std=c++11)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)

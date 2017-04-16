@@ -20,7 +20,7 @@ io_service networkService;
  */
 void printData(char *data)
 {
-    cout << data << endl;
+    Logger::print(data);
 }
 
 /**
@@ -129,12 +129,17 @@ bool parseParams(int argc, char **argv, Params &params)
             (OPT_SHUFFLE_FULL"," OPT_SHUFFLE_SHORT,
              boost::program_options::bool_switch()->default_value(DEFAULT_DISABLE_SHUFFLE),
              "disable ip list shuffling");
+    if (argc == 1) {
+        Logger::print(desc);
+        return false;
+    }
+
     try {
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 
         if (vm.count(OPT_HELP_FULL)) {
-            cout << desc << endl;
+            Logger::print(desc);
             return false;
         }
 
@@ -143,26 +148,28 @@ bool parseParams(int argc, char **argv, Params &params)
         option_dependency(vm, OPT_IP_FULL, OPT_PORT_FULL);
 
         if (!vm.count(OPT_PORT_FULL)) {
-            cout << "Option 'port' is required" << endl;
+            Logger::print("Option 'port' is required");
             return false;
         }
 
         if (!vm.count(OPT_THREADS_FULL)) {
-            cout << "Option 'threads' is required" << endl;
+            Logger::print("Option 'threads' is required");
             return false;
         }
 
         if (!vm.count(OPT_FILE_FULL)) {
             if (!vm.count(OPT_IP_FULL)) {
-                cout << "Option 'ip' or 'file' is required" << endl;
+                Logger::print("Option 'ip' or 'file' is required");
                 return false;
             }
         }
 
-        cout << "ip:" << vm[OPT_IP_FULL].as<string>() << endl;
-        cout << "port:" << vm[OPT_PORT_FULL].as<string>() << endl;
-        cout << "threads:" << vm[OPT_THREADS_FULL].as<int>() << endl;
-        cout << "shuffle disabled:" << vm[OPT_SHUFFLE_FULL].as<bool>() << endl;
+        std::stringstream ss;
+        ss << "ip:" << vm[OPT_IP_FULL].as<string>() << endl;
+        ss << "port:" << vm[OPT_PORT_FULL].as<string>() << endl;
+        ss << "threads:" << vm[OPT_THREADS_FULL].as<int>() << endl;
+        ss << "shuffle disabled:" << vm[OPT_SHUFFLE_FULL].as<bool>() << endl;
+        Logger::print(ss);
 
         params.ip = vm[OPT_IP_FULL].as<string>();
         params.port = vm[OPT_PORT_FULL].as<string>();
@@ -171,11 +178,8 @@ bool parseParams(int argc, char **argv, Params &params)
         params.timeoutMillisec = vm[OPT_TIMEOUT_FULL].as < unsigned
         long > ();
         params.enableShuffle = vm[OPT_SHUFFLE_FULL].as<bool>();
-    }
-    catch (exception &e) {
-        cerr << e.what() << endl;
-//        Logger::print({USAGE});
-        cout << desc << endl;
+    } catch (exception &e) {
+        Logger::print(desc);
         return false;
     }
 
